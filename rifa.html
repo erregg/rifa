@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gran rifa a beneficio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --color-primario: #1a73e8;
+      --color-secundario: #d32f2f;
+      --color-texto: #333;
+      --color-fondo: #ffffff;
+      --color-borde: #ccc;
+      --color-premiado: #4CAF50;
+      --color-agua: #EF9A9A;
+      --color-premiado-hover: #3d8b40;
+      --color-agua-hover: #E57373;
+      --color-reset: #ff9800;
+      --color-reset-hover: #f57c00;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 10px;
+      background-color: var(--color-fondo);
+      color: var(--color-texto);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    h1 {
+      color: var(--color-primario);
+      font-size: 3rem;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    h2 {
+      margin: 0 0 1rem 0;
+      font-size: 1.8rem;
+    }
+    
+    .fecha-sorteo {
+      color: var(--color-secundario);
+    }
+    
+    .contenedor-campos {
+      margin: 1rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .campo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.8rem;
+    }
+    
+    .etiqueta {
+      font-weight: bold;
+    }
+    
+    .resultado {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #f5f5f5;
+      border: 2px solid var(--color-borde);
+      border-radius: 8px;
+      min-width: 5rem;
+      color: var(--color-secundario);
+      font-weight: bold;
+      font-size: 2rem;
+    }
+    
+    .resultado-estado {
+      font-size: 1.8rem;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      margin: 0.5rem auto;
+      max-width: 90%;
+      display: none;
+    }
+    
+    .botones-estado {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 1rem 0;
+      width: 100%;
+    }
+    
+    .boton-estado {
+      font-size: 1.6rem;
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 90%;
+      max-width: 300px;
+      transition: transform 0.2s;
+    }
+    
+    .premiado {
+      background-color: var(--color-premiado);
+      color: white;
+    }
+    
+    .premiado:hover {
+      background-color: var(--color-premiado-hover);
+      transform: scale(1.02);
+    }
+    
+    .agua {
+      background-color: var(--color-agua);
+      color: white;
+    }
+    
+    .agua:hover {
+      background-color: var(--color-agua-hover);
+      transform: scale(1.02);
+    }
+    
+    .boton-reset {
+      background-color: var(--color-reset);
+      color: white;
+      font-size: 1.4rem;
+      padding: 0.7rem 1.5rem;
+      margin: 1rem auto;
+      width: 90%;
+      max-width: 300px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .boton-reset:hover {
+      background-color: var(--color-reset-hover);
+      transform: scale(1.02);
+    }
+    
+    .emoji {
+      font-size: 1.3em;
+    }
+    
+    #historial {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      flex-grow: 1;
+      width: 100%;
+    }
+    
+    #historial h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    #entradasHistorial {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 0.8rem;
+    }
+    
+    .entrada-historial {
+      border-bottom: 1px solid #eee;
+      padding: 0.6rem 0;
+      font-size: 1.4rem;
+      font-weight: bold;
+    }
+    
+    .acciones-historial {
+      display: flex;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-top: 0.8rem;
+    }
+    
+    .acciones-historial button {
+      padding: 0.6rem 1rem;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 6px;
+      background-color: #f1f3f4;
+    }
+    
+    @media (min-width: 500px) {
+      .botones-estado {
+        flex-direction: row;
+        justify-content: center;
+      }
+      
+      .boton-estado {
+        width: auto;
+        padding: 0.8rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Gran rifa a beneficio</h1>
+  
+  <h2>
+    <span>Sorteo: </span> 
+    <span class="fecha-sorteo">30-04-2025</span>
+  </h2>
+
+  <div class="contenedor-campos">
+    <div class="campo">
+      <span class="etiqueta">Número de rifa:</span>
+      <span id="numeroRifa" class="resultado">--</span>
+    </div>
+
+    <div class="campo">
+      <span class="etiqueta">Número sorteado:</span>
+      <span id="numeroSorteado" class="resultado">--</span>
+    </div>
+    
+    <div id="estadoResultado" class="resultado-estado"></div>
+  </div>
+
+  <div class="botones-estado">
+    <button class="boton-estado premiado" onclick="realizarSorteo('Premiado')">
+      <span class="emoji">😊</span> Premiado
+    </button>
+    <button class="boton-estado agua" onclick="realizarSorteo('Al agua')">
+      <span class="emoji">😢</span> Al agua
+    </button>
+  </div>
+
+  <button class="boton-reset" onclick="limpiarResultados()">
+    <span class="emoji">🧹</span> Limpiar resultados
+  </button>
+
+  <div id="historial">
+    <h2>Historial de sorteos</h2>
+    <div id="entradasHistorial"></div>
+    <div class="acciones-historial">
+      <button onclick="descargarHistorial()">Descargar Excel</button>
+      <button onclick="borrarHistorialCompleto()">Borrar historial</button>
+    </div>
+  </div>
+
+  <script>
+    const historialDatos = [];
+    const numeroRifaElement = document.getElementById('numeroRifa');
+    const numeroSorteadoElement = document.getElementById('numeroSorteado');
+    const estadoResultadoElement = document.getElementById('estadoResultado');
+    const entradasHistorialElement = document.getElementById('entradasHistorial');
+    
+    function formatFecha(fecha) {
+      const horas = String(fecha.getHours()).padStart(2, '0');
+      const minutos = String(fecha.getMinutes()).padStart(2, '0');
+      return `${horas}:${minutos}`;
+    }
+    
+    function realizarSorteo(estado) {
+      const numeroRifa = Math.floor(Math.random() * 44) + 1;
+      const numeroSorteado = Math.floor(Math.random() * 20) + 1;
+      
+      numeroRifaElement.textContent = numeroRifa;
+      numeroSorteadoElement.textContent = numeroSorteado;
+      
+      const emoji = estado === 'Premiado' ? '😊' : '😢';
+      estadoResultadoElement.textContent = estado.toUpperCase() + ' ' + emoji;
+      estadoResultadoElement.className = 'resultado-estado ' + (estado === 'Premiado' ? 'premiado' : 'agua');
+      estadoResultadoElement.style.display = 'inline-block';
+      
+      const ahora = new Date();
+      const entradaTexto = `Rifa: ${numeroRifa} | Sorteado: ${numeroSorteado} | ${estado} ${emoji} (${formatFecha(ahora)})`;
+      
+      historialDatos.push(entradaTexto);
+      mostrarEntradaHistorial(entradaTexto);
+      entradasHistorialElement.scrollTop = entradasHistorialElement.scrollHeight;
+    }
+    
+    function mostrarEntradaHistorial(texto) {
+      const entradaHTML = document.createElement('div');
+      entradaHTML.className = 'entrada-historial';
+      
+      if (texto.includes('Premiado')) {
+        entradaHTML.innerHTML = texto;
+        entradaHTML.style.color = 'var(--color-premiado)';
+      } else if (texto.includes('Al agua')) {
+        entradaHTML.innerHTML = texto;
+        entradaHTML.style.color = 'var(--color-agua)';
+      }
+      
+      entradasHistorialElement.appendChild(entradaHTML);
+    }
+    
+    function limpiarResultados() {
+      // Limpiar solo los campos de resultados
+      numeroRifaElement.textContent = '--';
+      numeroSorteadoElement.textContent = '--';
+      estadoResultadoElement.style.display = 'none';
+    }
+    
+    function borrarHistorialCompleto() {
+      if (historialDatos.length === 0) {
+        alert('El historial ya está vacío');
+        return;
+      }
+      
+      if (confirm('¿Estás seguro de borrar todo el historial?')) {
+        historialDatos.length = 0;
+        entradasHistorialElement.innerHTML = '';
+      }
+    }
+    
+    function descargarHistorial() {
+      if (historialDatos.length === 0) {
+        alert('No hay datos para descargar.');
+        return;
+      }
+      
+      // Preparar los datos para Excel
+      const datosExcel = [
+        ['Número Rifa', 'Número Sorteado', 'Estado', 'Hora'] // Encabezados
+      ];
+      
+      // Procesar cada entrada del historial
+      historialDatos.forEach(entrada => {
+        // Extraer los datos usando expresiones regulares
+        const match = entrada.match(/Rifa: (\d+) \| Sorteado: (\d+) \| (Premiado|Al agua).*?\((\d{2}:\d{2})\)/);
+        if (match) {
+          datosExcel.push([
+            parseInt(match[1]),  // Número de rifa (como número)
+            parseInt(match[2]),  // Número sorteado (como número)
+            match[3],            // Estado (sin emoji)
+            match[4]             // Hora
+          ]);
+        }
+      });
+      
+      // Crear libro de Excel
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(datosExcel);
+      
+      // Ajustar el ancho de las columnas
+      ws['!cols'] = [
+        {wch: 12},  // Ancho columna Número Rifa
+        {wch: 15},  // Ancho columna Número Sorteado
+        {wch: 12},  // Ancho columna Estado
+        {wch: 10}   // Ancho columna Hora
+      ];
+      
+      // Agregar hoja al libro
+      XLSX.utils.book_append_sheet(wb, ws, "Historial Rifa");
+      
+      // Generar archivo y descargar
+      XLSX.writeFile(wb, `historial_rifa_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+  </script>
+</body>
+</html>
