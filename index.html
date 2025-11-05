@@ -12,9 +12,9 @@
       --color-texto: #333;
       --color-fondo: #ffffff;
       --color-borde: #ccc;
-      --color-premiado: #4CAF50;
+      --color-ganador: #4CAF50;
       --color-agua: #EF9A9A;
-      --color-premiado-hover: #3d8b40;
+      --color-ganador-hover: #3d8b40;
       --color-agua-hover: #E57373;
       --color-reset: #ff9800;
       --color-reset-hover: #f57c00;
@@ -117,13 +117,13 @@
       transition: transform 0.2s;
     }
     
-    .premiado {
-      background-color: var(--color-premiado);
+    .ganador {
+      background-color: var(--color-ganador);
       color: white;
     }
     
-    .premiado:hover {
-      background-color: var(--color-premiado-hover);
+    .background:hover {
+      background-color: var(--color-background-hover);
       transform: scale(1.02);
     }
     
@@ -240,8 +240,8 @@
   </div>
 
   <div class="botones-estado">
-    <button class="boton-estado premiado" onclick="realizarSorteo('Premiado')">
-      <span class="emoji">😊</span> Premiado
+    <button class="boton-estado ganador" onclick="realizarSorteo('Ganador')">
+      <span class="emoji">😊</span> Ganador
     </button>
     <button class="boton-estado agua" onclick="realizarSorteo('Al agua')">
       <span class="emoji">😢</span> Al agua
@@ -281,13 +281,13 @@
       numeroRifaElement.textContent = numeroRifa;
       numeroSorteadoElement.textContent = numeroSorteado;
       
-      const emoji = estado === 'Premiado' ? '😊' : '😢';
+      const emoji = estado === 'Ganador' ? '😊' : '😢';
       estadoResultadoElement.textContent = estado.toUpperCase() + ' ' + emoji;
-      estadoResultadoElement.className = 'resultado-estado ' + (estado === 'Premiado' ? 'premiado' : 'agua');
+      estadoResultadoElement.className = 'resultado-estado ' + (estado === 'Ganador' ? 'ganador' : 'agua');
       estadoResultadoElement.style.display = 'inline-block';
       
       const ahora = new Date();
-      const entradaTexto = `Rifa: ${numeroRifa} | Sorteado: ${numeroSorteado} | ${estado} ${emoji} (${formatFecha(ahora)})`;
+      const entradaTexto = `Nro. de rifa: ${numeroRifa} | Nro. sorteado: ${numeroSorteado} | ${estado} ${emoji} (${formatFecha(ahora)})`;
       
       historialDatos.push(entradaTexto);
       mostrarEntradaHistorial(entradaTexto);
@@ -298,9 +298,9 @@
       const entradaHTML = document.createElement('div');
       entradaHTML.className = 'entrada-historial';
       
-      if (texto.includes('Premiado')) {
+      if (texto.includes('Ganador')) {
         entradaHTML.innerHTML = texto;
-        entradaHTML.style.color = 'var(--color-premiado)';
+        entradaHTML.style.color = 'var(--color-ganador)';
       } else if (texto.includes('Al agua')) {
         entradaHTML.innerHTML = texto;
         entradaHTML.style.color = 'var(--color-agua)';
@@ -342,7 +342,7 @@
       // Procesar cada entrada del historial
       historialDatos.forEach(entrada => {
         // Extraer los datos usando expresiones regulares
-        const match = entrada.match(/Rifa: (\d+) \| Sorteado: (\d+) \| (Premiado|Al agua).*?\((\d{2}:\d{2})\)/);
+        const match = entrada.match(/Rifa: (\d+) \| Sorteado: (\d+) \| (Ganador|Al agua).*?\((\d{2}:\d{2})\)/);
         if (match) {
           datosExcel.push([
             parseInt(match[1]),  // Número de rifa (como número)
